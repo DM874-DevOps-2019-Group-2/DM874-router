@@ -16,7 +16,7 @@ object Entrypoint {
   type Key = String
   type Data = String
 
-  type DynamicallyRoutedData = (Data, Option[OutputTopic])
+  type DynamicallyRoutedData = Seq[(Data, OutputTopic)]
   type RoutedData = (Data, OutputTopic)
 }
 
@@ -75,8 +75,8 @@ class Entrypoint (
     stream
       .map { case (k, v) =>
         (k, handler(k, v))
-      }      .filter{ case (k, (d, topic)) => topic.isDefined }
-      .map{ case (k, (d, topic)) => (k, (d, topic.get)) }
+      }
+      .flatMapValues(x => x)
       .to((_: Key, value: RoutedData, _: RecordContext) => {
         value._2
       })(Produced.`with`(org.apache.kafka.streams.scala.Serdes.String, TupleSerde.serde))
