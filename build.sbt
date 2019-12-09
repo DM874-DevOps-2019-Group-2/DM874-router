@@ -4,7 +4,7 @@ import Dependencies._
 
 lazy val root = (project in file("."))
     .settings(
-      name := "dm874-auth",
+      name := "dm874-router",
       organization := "dm874",
       version := "1.0",
       libraryDependencies ++= Seq(
@@ -23,6 +23,7 @@ lazy val root = (project in file("."))
             log4j,
             kafkaStreamsJava,
             kafkaStreamsScala,
+            redisScala,
             //hikari
       )
 )
