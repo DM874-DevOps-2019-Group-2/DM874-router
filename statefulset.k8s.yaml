@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: router
+spec:
+  replicas: 1
+  serviceName: "router"
+  selector:
+    matchLabels:
+      app: router
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: router
+    spec:
+      containers:
+        - name: router-container
+          image: ROUTER_IMAGE
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: redis-config
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "500m"
+            limits:
+              memory: "600Mi"
+              cpu: "1000m"
