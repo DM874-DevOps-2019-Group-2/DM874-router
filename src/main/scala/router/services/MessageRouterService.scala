@@ -17,19 +17,19 @@ class MessageRouterService(
       case Right(value) => {
         val destinationIds = value.messageDestinations.map{ _.destinationId }
 
-        //The ids should be found distinctively
-        val queryResult = destinationIds match {
-          case x :: xs => Future { redisClient.mget(x.toString, xs.map(_.toString): _*) }.flatMap{
-            case None => LoggedException.getInstanceFuture(withLogger(_.error(s"Redis server returned value nil from query")))
-            case Some(x) => Future.successful(x)
-          }
-          //No ids
-          case Nil => Future.successful(List.empty)
+        val result = value.messageDestinations.map{ destination =>
+          destination -> redisClient.smembers(destination.destinationId)
         }
 
-        queryResult
-          .map(serviceNames => serviceNames zip value.messageDestinations)
-          .map(_.collect{ case (Some(serviceTopic), dest) => dest.message -> serviceTopic })
+        val withTargets = result.collect{ case (destination, Some(targets)) => destination -> targets.flatten }.filter{ case (_, targets) => targets.nonEmpty }
+
+        import io.circe.syntax._
+
+        val out = withTargets.flatMap{ case (destination, targets) =>
+          targets.map(target => destination.asJson.noSpaces -> target)
+        }
+
+        Future.successful(out)
       }
     }
   }
