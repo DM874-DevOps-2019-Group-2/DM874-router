@@ -21,7 +21,13 @@ spec:
           imagePullPolicy: Always
           envFrom:
             - configMapRef:
-                name: redis-config
+                name: redis-connection-config
+            - secretRef:
+                name: jwt-secret
+            - configMapRef:
+                name: kafka-connection-config
+            - configMapRef:
+                name: router-config
           resources:
             requests:
               memory: "300Mi"

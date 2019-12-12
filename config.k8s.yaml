@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: router-config
+data:
+  KAFKA_STREAMS_STATEDIR: "/tmp/kstreams"
+  CONSUMER_TOPIC: "consumer-topic"
