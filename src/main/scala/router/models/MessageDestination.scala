@@ -7,6 +7,5 @@ object MessageDestination {
 
 case class MessageDestination(
                              destinationId: Int,
-                             message: String,
-                             fromAutoReply: Boolean
+                             message: String
                              )

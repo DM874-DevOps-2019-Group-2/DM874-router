@@ -21,7 +21,8 @@ object Entrypoint {
 }
 
 class Entrypoint (
-                   config: com.typesafe.config.Config
+                   config: com.typesafe.config.Config,
+                   configName: String
                  ) extends ClassLogger {
   import Entrypoint._
 
@@ -67,7 +68,7 @@ class Entrypoint (
   private val builder = new StreamsBuilder
 
   // We create two readers
-  private val stream = builder.stream[Key, Data](topic = config.getString("kafka.streams.topic"))
+  private val stream = builder.stream[Key, Data](topic = config.getString(configName))
 
   type StartHandler = (Key, Data) => DynamicallyRoutedData
 

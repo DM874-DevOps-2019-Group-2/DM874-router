@@ -7,7 +7,7 @@ import router.models.MessageDestination
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MessageRouterService(
+class MessageEndpointService(
                             redisClient: RedisClient
                           )(implicit ec: ExecutionContext) extends ClassLogger {
   def handle(key: Entrypoint.Key, data: Entrypoint.Data): Future[Entrypoint.DynamicallyRoutedData] = {
@@ -16,13 +16,19 @@ class MessageRouterService(
     decode[router.models.EventSourcingModel](data) match {
       case Left(value) => LoggedException.getInstanceFuture(withLogger(_.error(s"Failed to decode EventSourcingModel with exception ${value}")))
       case Right(value) => {
-        val topics = redisClient.smembers("topics").getOrElse(Set.empty).flatten.toSeq
+        val asMsgDestinations = value.recipientIds.map(id => MessageDestination(id, value.messageBody))
 
-        val out = value.copy(eventDestinations = topics)
+        val withServiceNames = asMsgDestinations.map(x => x -> redisClient.smembers(x.destinationId).getOrElse(Set.empty).flatten)
 
         import io.circe.syntax._
 
-        Future.successful(Seq((out.asJson.noSpaces, topics.head)))
+        val out = withServiceNames.flatMap{ case (destination, topics) =>
+          val stringify = destination.asJson.noSpaces
+
+          topics.map(topic => stringify -> topic)
+        }
+
+        Future.successful(out)
       }
     }
   }

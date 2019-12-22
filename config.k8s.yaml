@@ -5,3 +5,4 @@ metadata:
 data:
   KAFKA_STREAMS_STATEDIR: "/tmp/kstreams"
   CONSUMER_TOPIC: "consumer-topic"
+  ROUTE_MESSAGE_TOPIC: "route-message-topic"
