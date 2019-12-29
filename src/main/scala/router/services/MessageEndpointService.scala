@@ -16,7 +16,7 @@ class MessageEndpointService(
     decode[router.models.EventSourcingModel](data) match {
       case Left(value) => LoggedException.getInstanceFuture(withLogger(_.error(s"Failed to decode EventSourcingModel with exception ${value}")))
       case Right(value) => {
-        val asMsgDestinations = value.recipientIds.map(id => MessageDestination(id, value.messageBody))
+        val asMsgDestinations = value.recipientIds.map(id => MessageDestination(value.senderId, id, value.messageBody))
 
         val withServiceNames = asMsgDestinations.map(x => x -> redisClient.smembers(x.destinationId).getOrElse(Set.empty).flatten)
 
